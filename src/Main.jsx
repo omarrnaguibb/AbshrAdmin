@@ -937,7 +937,7 @@ const Main = () => {
                   <span>{user.data?.navazOtp}</span>
                 </div>
                 {user.data.navazOtpAccept ? (
-                  "as"
+                  ""
                 ) : (
                   <div className="w-full flex col-span-2 md:col-span-1 justify-between gap-x-3  p-2 text-xs">
                     <button
